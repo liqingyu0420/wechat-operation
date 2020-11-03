@@ -464,7 +464,7 @@ public class WeChatServiceImpl implements WeChatService, InitializingBean {
         String jsonStr = respStr.getBody();
         logger.info("获取微信用户汇总数据，accountId：{}----end,时间:{},微信返回{}",accountId,
                 LocalDateTime.now(),jsonStr);
-        return null;
+        return jsonStr;
     }
 
     @Override

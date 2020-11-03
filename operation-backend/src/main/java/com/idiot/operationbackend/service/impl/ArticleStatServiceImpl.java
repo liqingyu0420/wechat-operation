@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -53,6 +54,7 @@ public class ArticleStatServiceImpl  extends ServiceImpl<ArticleStatMapper, Arti
         String msgId = null;
         ArticleStat articleStat = null;
         List<ArticleStat> varArray = new ArrayList<>(size);
+        String createTime = LocalDateTime.now().format(Constants.DATE_TIME_FORMATTER);
         for (int i = 0; i < size; i++) {
             articleStat = new ArticleStat();
             var = jsonArray.getJSONObject(i);
@@ -75,6 +77,7 @@ public class ArticleStatServiceImpl  extends ServiceImpl<ArticleStatMapper, Arti
             articleStat.setTargetUser(var.getLong("target_user"));
             articleStat.setTitle(var.getString("title"));
             articleStat.setStatDate(var.getString("ref_date"));
+            articleStat.setCreateTime(createTime);
             varArray.add(articleStat);
         }
         saveOrUpdateBatch(varArray);

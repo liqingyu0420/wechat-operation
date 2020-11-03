@@ -87,9 +87,9 @@ public class AccountStatServiceImpl extends ServiceImpl<AccountStatMapper, Accou
         }
         int totalSize = jsonArrayTotal.size();
         if (totalSize > 0) {
-            totalNum = jsonArrayTotal.getJSONObject(0).getInteger("cumulate_user");
+            totalNum = jsonArrayTotal.getJSONObject(0).getLongValue("cumulate_user");
+            log.debug("totalNum is "+totalNum);
         }
-
         // 昨日和前日 数据
         // fixme 查询次数过多可以放在 观察者模式中异步执行（先看时间后期优化）
         List<AccountStat> statData = baseMapper.selectByDateAndAccId(accountId,yesterday,beforeDay);
@@ -124,6 +124,7 @@ public class AccountStatServiceImpl extends ServiceImpl<AccountStatMapper, Accou
                     ydData.setInactiveRate(Constants.calcRate(ydData.getInactiveNum(),e.getInactiveNum()));
                     return ydData;
         });
+        ydData.setCreateTime(LocalDateTime.now().format(Constants.DATE_TIME_FORMATTER));
         saveOrUpdate(ydData);
     }
 
@@ -169,5 +170,22 @@ public class AccountStatServiceImpl extends ServiceImpl<AccountStatMapper, Accou
                 .ge(AccountStat::getStatDate,startStr)
                 .le(AccountStat::getStatDate,endStr)
                 .orderByAsc(AccountStat::getStatDate));
+    }
+
+    public static void main(String[] args) {
+
+        long totalNum = 0;
+        String json = "{\"list\":[{\"ref_date\":\"2020-11-02\",\"user_source\":0,\"cumulate_user\":2329}]}";
+        JSONObject jsonObjectTotal = JSONObject.parseObject(json);
+        JSONArray jsonArrayTotal = new JSONArray(0);
+        if (Objects.nonNull(jsonObjectTotal)) {
+            jsonArrayTotal = jsonObjectTotal.getJSONArray("list");
+        }
+        int totalSize = jsonArrayTotal.size();
+        if (totalSize > 0) {
+            totalNum = jsonArrayTotal.getJSONObject(0).getLongValue("cumulate_user");
+            System.out.println(totalNum);
+        }
+
     }
 }
