@@ -11,10 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * 微信 event 消息
@@ -53,7 +55,8 @@ public class EventMessageServiceImpl implements WeChatMessageService {
         try {
             return eventMap.getOrDefault(eventType,this::unSupportedMessage).apply(param);
         }catch (Exception e){
-            e.printStackTrace();
+            String errorStr = Arrays.stream(e.getStackTrace()).map(StackTraceElement::toString).collect(Collectors.joining("\n"));
+            logger.error(errorStr);
             return Constants.SUCCESS;
         }
 

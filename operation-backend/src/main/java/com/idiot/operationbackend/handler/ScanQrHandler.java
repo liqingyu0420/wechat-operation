@@ -2,6 +2,7 @@ package com.idiot.operationbackend.handler;
 
 import com.idiot.operationbackend.controller.WeChatController;
 import com.idiot.operationbackend.service.facade.WeChatService;
+import com.idiot.operationbackend.support.CustomException;
 import com.idiot.operationbackend.support.ScanQrInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,10 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 
 /**
@@ -36,13 +39,8 @@ public class ScanQrHandler implements InitializingBean {
         logger.info("SCAN_QUEUE is add ");
         SCAN_QUEUE.offerLast(scanQrInfo);
     }
-    /**
-     *  末尾元素添加
-     * @author wangxiao
-     * @date 18:03 2020/9/24
-     * @return com.idiot.operationbackend.support.ScanQrInfo
-     */
-    public ScanQrInfo getElement (){
+
+    private ScanQrInfo getElement (){
         return SCAN_QUEUE.pollFirst();
     }
     /**
@@ -51,7 +49,7 @@ public class ScanQrHandler implements InitializingBean {
      * @date 18:04 2020/9/24
      * @return boolean
      */
-    public  boolean isEmpty () {
+    private boolean isEmpty () {
         return SCAN_QUEUE.isEmpty();
     }
 
@@ -64,12 +62,10 @@ public class ScanQrHandler implements InitializingBean {
 
 
 
-    private void expire () {
-        while(true) {
+    private void expire (){
+        while(!isEmpty()) {
+            logger.info("exec");
             try {
-                if (isEmpty()) {
-                    TimeUnit.SECONDS.sleep(5);
-                }
                 ScanQrInfo scanQrInfo = getElement();
                 if (Objects.nonNull(scanQrInfo)) {
                     String openId = scanQrInfo.getOpenId();
@@ -80,10 +76,12 @@ public class ScanQrHandler implements InitializingBean {
                     weChatService.processScanQrCode(accountId,openId,qrCodeId,contents);
                     logger.warn("扫描二维码推送信息,qrCodeId:{},openId:{},accountId:{}------>end",qrCodeId,openId,accountId);
                 }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                String errorStr = Arrays.stream(e.getStackTrace()).map(StackTraceElement::toString).collect(Collectors.joining("\n"));
+                logger.error(errorStr);
                 break;
             }
         }
     }
+
 }

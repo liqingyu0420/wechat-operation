@@ -174,25 +174,11 @@ public class AccountFansServiceImpl extends ServiceImpl<AccountFansMapper, Accou
 
     @Override
     public List<AccountFans> queryAccountFans(String accountId, Integer sex, String province, String city, String tags, String subscribeTime) {
-        LambdaQueryWrapper<AccountFans> queryWrapper =  Wrappers.lambdaQuery();
-        execSqlPre(accountId, sex, province, city,queryWrapper);
-        String [] dateArray = subscribeTime.split(",");
-        if (StringUtils.isNotBlank(subscribeTime)) {
-            long start = Constants.toLocalDateTime(dateArray[0])
-                    .toEpochSecond(Constants.DEFAULT_ZONE);
-            long end = Constants.toLocalDateTime(dateArray[1])
-                    .toEpochSecond(Constants.DEFAULT_ZONE);
-            queryWrapper.ge(AccountFans::getSubscribeTime,start)
-                    .le(AccountFans::getSubscribeTime,end);
-        }
-
-        execTagSql(tags, queryWrapper);
+        LambdaQueryWrapper<AccountFans> queryWrapper =  fansSql(accountId, sex, province, city, tags, subscribeTime);;
         return list(queryWrapper);
     }
 
-
-    @Override
-    public int countAccountFans(String accountId, Integer sex, String province, String city, String tags, String subscribeTime) {
+    private  LambdaQueryWrapper<AccountFans> fansSql(String accountId, Integer sex, String province, String city, String tags, String subscribeTime) {
         LambdaQueryWrapper<AccountFans> queryWrapper =  Wrappers.lambdaQuery();
         execSqlPre(accountId, sex, province, city,queryWrapper);
         if (StringUtils.isNotBlank(subscribeTime)) {
@@ -204,8 +190,14 @@ public class AccountFansServiceImpl extends ServiceImpl<AccountFansMapper, Accou
             queryWrapper.ge(AccountFans::getSubscribeTime,start)
                     .le(AccountFans::getSubscribeTime,end);
         }
-
         execTagSql(tags, queryWrapper);
+        return queryWrapper;
+    }
+
+
+    @Override
+    public int countAccountFans(String accountId, Integer sex, String province, String city, String tags, String subscribeTime) {
+        LambdaQueryWrapper<AccountFans> queryWrapper = fansSql(accountId, sex, province, city, tags, subscribeTime);
         return count(queryWrapper);
     }
 

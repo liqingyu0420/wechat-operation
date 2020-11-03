@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.google.common.cache.*;
 import com.idiot.operationbackend.config.PlatformProperties;
 import com.idiot.operationbackend.entity.*;
 import com.idiot.operationbackend.handler.FansInfoHandler;
@@ -333,26 +332,26 @@ public class WeChatServiceImpl implements WeChatService, InitializingBean {
             AccountFans fans = fansService.queryByAccountIdAndOpenId(accountId,openId);
             if (fans == null) {
                 fans = new AccountFans();
+                JSONObject fansObject = JSON.parseObject(getFansInfo(accountId,openId));
+                fans.setAccountId(accountId);
+                fans.setOpenId(openId);
+                fans.setNickName(fansObject.getString("nickname"));
+                fans.setHeadImgUrl(fansObject.getString("headimgurl"));
+                fans.setSex(fansObject.getInteger("sex"));
+                fans.setSubscribe(fansObject.getInteger("subscribe"));
+                fans.setCity(fansObject.getString("city"));
+                fans.setProvince(fansObject.getString("province"));
+                fans.setSubscribeTime(fansObject.getLong("subscribe_time"));
+                fans.setSubscribeScene(fansObject.getString("subscribe_scene"));
+                fans.setUnionId(fansObject.getString("unionid"));
+                fans.setRemark(fansObject.getString("remark"));
+                fans.setGroupId(fansObject.getInteger("groupid"));
+                fans.setTagIdList(JSONObject.toJSONString(fansObject.getJSONArray("tagid_list")));
+                fans.setTags(fans.initTags());
+                fans.setState(true);
+                fans.setCreateTime(LocalDateTime.now().toEpochSecond(Constants.DEFAULT_ZONE));
+                accountFans.add(fans);
             }
-            JSONObject fansObject = JSON.parseObject(getFansInfo(accountId,openId));
-            fans.setAccountId(accountId);
-            fans.setOpenId(openId);
-            fans.setNickName(fansObject.getString("nickname"));
-            fans.setHeadImgUrl(fansObject.getString("headimgurl"));
-            fans.setSex(fansObject.getInteger("sex"));
-            fans.setSubscribe(fansObject.getInteger("subscribe"));
-            fans.setCity(fansObject.getString("city"));
-            fans.setProvince(fansObject.getString("province"));
-            fans.setSubscribeTime(fansObject.getLong("subscribe_time"));
-            fans.setSubscribeScene(fansObject.getString("subscribe_scene"));
-            fans.setUnionId(fansObject.getString("unionid"));
-            fans.setRemark(fansObject.getString("remark"));
-            fans.setGroupId(fansObject.getInteger("groupid"));
-            fans.setTagIdList(JSONObject.toJSONString(fansObject.getJSONArray("tagid_list")));
-            fans.setTags(fans.initTags());
-            fans.setState(true);
-            fans.setCreateTime(LocalDateTime.now().toEpochSecond(Constants.DEFAULT_ZONE));
-            accountFans.add(fans);
         }
         logger.info("公众号：{}同步粉丝请求粉丝信息,openId 大小:{}---- end,时间:{}",accountId,size,LocalDateTime.now());
         //  保存用户
@@ -877,24 +876,28 @@ public class WeChatServiceImpl implements WeChatService, InitializingBean {
          * 先保存新用户
          */
         AccountFans accountFans = fansService.queryByAccountIdAndOpenId(accountId,openId);
-        JSONObject fansObject = JSON.parseObject(getFansInfo(accountId,openId));
-        accountFans.setAccountId(accountId);
-        accountFans.setOpenId(openId);
-        accountFans.setNickName(fansObject.getString("nickname"));
-        accountFans.setHeadImgUrl(fansObject.getString("headimgurl"));
-        accountFans.setSex(fansObject.getInteger("sex"));
-        accountFans.setSubscribe(fansObject.getInteger("subscribe"));
-        accountFans.setCity(fansObject.getString("city"));
-        accountFans.setProvince(fansObject.getString("province"));
-        accountFans.setSubscribeTime(fansObject.getLong("subscribe_time"));
-        accountFans.setSubscribeScene(fansObject.getString("subscribe_scene"));
-        accountFans.setUnionId(fansObject.getString("unionid"));
-        accountFans.setRemark(fansObject.getString("remark"));
-        accountFans.setGroupId(fansObject.getInteger("groupid"));
-        accountFans.setTagIdList(JSONObject.toJSONString(fansObject.getJSONArray("tagid_list")));
-        accountFans.setTags(accountFans.initTags());
-        accountFans.setState(true);
-        fansService.saveOrUpdate(accountFans);
+
+        if (Objects.isNull(accountFans)){
+            accountFans = new AccountFans();
+            JSONObject fansObject = JSON.parseObject(getFansInfo(accountId,openId));
+            accountFans.setAccountId(accountId);
+            accountFans.setOpenId(openId);
+            accountFans.setNickName(fansObject.getString("nickname"));
+            accountFans.setHeadImgUrl(fansObject.getString("headimgurl"));
+            accountFans.setSex(fansObject.getInteger("sex"));
+            accountFans.setSubscribe(fansObject.getInteger("subscribe"));
+            accountFans.setCity(fansObject.getString("city"));
+            accountFans.setProvince(fansObject.getString("province"));
+            accountFans.setSubscribeTime(fansObject.getLong("subscribe_time"));
+            accountFans.setSubscribeScene(fansObject.getString("subscribe_scene"));
+            accountFans.setUnionId(fansObject.getString("unionid"));
+            accountFans.setRemark(fansObject.getString("remark"));
+            accountFans.setGroupId(fansObject.getInteger("groupid"));
+            accountFans.setTagIdList(JSONObject.toJSONString(fansObject.getJSONArray("tagid_list")));
+            accountFans.setTags(accountFans.initTags());
+            accountFans.setState(true);
+            fansService.saveOrUpdate(accountFans);
+        }
         Account account = accountService.getById(accountId);
         account.setFansNum(account.getFansNum()+1);
         accountService.updateById(account);
@@ -1295,7 +1298,7 @@ public class WeChatServiceImpl implements WeChatService, InitializingBean {
             parent.put("msgtype","voice");
         }else if (Constants.TEXT == type) {
             target.put("content",jsonObject.getString("content"));
-            parent.put("voice",target);
+            parent.put("text",target);
             parent.put("msgtype","text");
         }else if (Constants.IMG == type) {
             target.put("media_ids",jsonObject.getString("media_id"));
