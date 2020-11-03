@@ -69,6 +69,14 @@ public interface AccountService extends IService<Account> {
      */
     Account queryByAppId (String appId);
 
+    /**
+     *  查询公众号
+     * @author wangxiao
+     * @date 14:29 2020/11/3
+     * @param userName userName
+     * @return com.idiot.operationbackend.entity.Account
+     */
+    Account queryByUserName(String userName);
 
     /**
      *  query  first account name

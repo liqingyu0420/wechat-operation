@@ -31,9 +31,10 @@ public class ScanQrHandler implements InitializingBean {
 
     private final Logger logger = LoggerFactory.getLogger(WeChatController.class);
 
-    public  boolean addElement (String accountId,String openId,String qrCodeId,String contents) {
+    public  void addElement (String accountId,String openId,String qrCodeId,String contents) {
         ScanQrInfo scanQrInfo = new ScanQrInfo(accountId,openId,qrCodeId,contents);
-        return SCAN_QUEUE.offerFirst(scanQrInfo);
+        logger.info("SCAN_QUEUE is add ");
+        SCAN_QUEUE.offerLast(scanQrInfo);
     }
     /**
      *  末尾元素添加
@@ -42,7 +43,7 @@ public class ScanQrHandler implements InitializingBean {
      * @return com.idiot.operationbackend.support.ScanQrInfo
      */
     public ScanQrInfo getElement (){
-        return SCAN_QUEUE.pollLast();
+        return SCAN_QUEUE.pollFirst();
     }
     /**
      *  是否时空
@@ -67,7 +68,7 @@ public class ScanQrHandler implements InitializingBean {
         while(true) {
             try {
                 if (isEmpty()) {
-                    TimeUnit.SECONDS.sleep(15);
+                    TimeUnit.SECONDS.sleep(5);
                 }
                 ScanQrInfo scanQrInfo = getElement();
                 if (Objects.nonNull(scanQrInfo)) {

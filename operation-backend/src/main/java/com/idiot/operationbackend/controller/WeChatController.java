@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -20,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -116,7 +118,7 @@ public class WeChatController {
     }
 
 
-    @PostMapping("/msgCallback/{appId}")
+    @PostMapping(value = "/msgCallback/{appId}",produces = MediaType.TEXT_XML_VALUE)
     @ApiOperation(value = "消息回调")
     public String receiveWeChatMessage (@PathVariable String appId,
                                         HttpServletRequest request) throws Exception {
@@ -125,26 +127,44 @@ public class WeChatController {
         // 默认aes
         String encryptType = request.getParameter("encrypt_type");
         String msgSignature = request.getParameter("msg_signature");
-        logger.info("接受微信事件回调,param参数依次是nonce:{},timestamp:{},encrypt_type:{},msg_signature:{}",nonce,
-                timestamp,encryptType,msgSignature);
+        logger.info("接受微信事件回调,param参数依次是nonce:{},timestamp:{},encrypt_type:{},msg_signature:{},appId:{}",
+                nonce, timestamp,encryptType,msgSignature,appId);
         request.setCharacterEncoding("UTF-8");
         String postData = readBody(request);
         logger.info("接受微信事件回调,postData before decry :{}",postData);
-        postData = weChatService.decryptMsg(msgSignature,timestamp,nonce,postData,false);
+        try {
+            postData = weChatService.decryptMsg(msgSignature,timestamp,nonce,postData,false);
+        }catch (Exception e){
+            return Constants.SUCCESS;
+        }
         logger.info("接受微信事件回调,postData after decry :{}",postData);
         Map<String,String> xmlMap =  weChatService.xmlToMap(postData);
         String msgType = xmlMap.get("MsgType");
         Account account =  accountService.queryByAppId(appId);
+        if (Objects.isNull(account)){
+           return Constants.SUCCESS;
+        }
         xmlMap.put("accountId",account.getId());
         WeChatMessageService messageService = WeChatMessageFactory.getService(msgType);
         if (Objects.isNull(messageService)) {
             logger.error("接受到消息暂无处理类处理：{}",msgType);
-            return Constants.FAIL;
+            return Constants.SUCCESS;
         }else {
             return messageService.processMessage(xmlMap);
         }
     }
 
+    @GetMapping("/msgCallback/{appId}")
+    @ApiOperation(value = "验证登录", notes = "验证登录")
+    public String addHomeIcon(@PathVariable String appId,
+                              @RequestParam(required = false) String signature,
+                              @RequestParam(required = false)String timestamp,
+                              @RequestParam(required = false) String nonce,
+                              @RequestParam(required = false) String echostr) {
+        logger.info("********************************{},{},{},{},{}",appId,signature,timestamp,nonce,echostr);
+
+        return weChatService.checkSignature( signature, timestamp, nonce) ? echostr : "fail";
+    }
 
     private String readBody (HttpServletRequest request) throws IOException {
         BufferedInputStream bis = new BufferedInputStream(request.getInputStream());

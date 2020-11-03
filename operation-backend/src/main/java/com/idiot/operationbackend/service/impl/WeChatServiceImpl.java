@@ -27,6 +27,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.Resource;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
@@ -715,8 +717,14 @@ public class WeChatServiceImpl implements WeChatService, InitializingBean {
     public String createQrCode(QrCode qrCode, String accountId) {
         String requestUrl = "https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=%s";
         int type = qrCode.getType();
-        String actionName = type==0?"QR_STR_SCENE":"QR_LIMIT_STR_SCENE";
         JSONObject parentNode  = new JSONObject();
+        String actionName = "";
+        if (type == 0){
+            actionName = "QR_STR_SCENE";
+            parentNode.put("expire_seconds",2592000);
+        }else {
+            actionName = "QR_LIMIT_STR_SCENE";
+        }
         parentNode.put("action_name",actionName);
         JSONObject childNode = new JSONObject();
         childNode.put("scene_str",qrCode.getId());
@@ -983,6 +991,23 @@ public class WeChatServiceImpl implements WeChatService, InitializingBean {
         logger.info("微信公众号:{}查询素材详情,mediaId is :{}----end,时间:{},微信返回:{}",accountId,mediaId,
                 LocalDateTime.now(),jsonStr);
         return jsonStr;
+    }
+
+    @Override
+    public boolean checkSignature( String signature, String timestamp, String nonce) {
+
+        String[] paramArr = new String[] {properties.getToken(), timestamp, nonce};
+        Arrays.sort(paramArr);
+        String content  = paramArr[0].concat(paramArr[1]).concat(paramArr[2]);
+        String ciphertext = null;
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            byte[] digest = md.digest(content.getBytes());
+            ciphertext = Constants.byteToStr(digest);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return ciphertext != null && ciphertext.equals(signature.toUpperCase());
     }
 
     /**

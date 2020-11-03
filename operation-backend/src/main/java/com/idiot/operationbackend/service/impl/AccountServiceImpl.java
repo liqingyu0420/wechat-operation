@@ -80,6 +80,12 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account>
         return list(Wrappers.<Account>lambdaQuery().eq(Account::getState,"1"));
     }
 
+
+    @Override
+    public Account queryByUserName(String userName) {
+        return getOne(Wrappers.<Account>lambdaQuery().eq(Account::getUserName,userName),false);
+    }
+
     @Override
     public Account queryByAppId(String appId) {
         return getOne(Wrappers.<Account>lambdaQuery().eq(Account::getAuthorizerAppId,appId),false);

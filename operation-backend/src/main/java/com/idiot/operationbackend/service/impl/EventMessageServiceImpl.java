@@ -50,7 +50,13 @@ public class EventMessageServiceImpl implements WeChatMessageService {
     @Override
     public String processMessage(Map<String, String> param) {
         String eventType = param.get("Event");
-        return eventMap.getOrDefault(eventType,this::unSupportedMessage).apply(param);
+        try {
+            return eventMap.getOrDefault(eventType,this::unSupportedMessage).apply(param);
+        }catch (Exception e){
+            e.printStackTrace();
+            return Constants.SUCCESS;
+        }
+
     }
 
 
@@ -69,7 +75,7 @@ public class EventMessageServiceImpl implements WeChatMessageService {
      * @return java.lang.String
      */
     private String subscribeEvent (Map<String,String> param) {
-        logger.info("********************* param is {}*****************",param.toString());
+        logger.info("*********************  subscribeEvent param is {}*****************",param.toString());
         String key = param.get("EventKey");
         String accountId = param.get("accountId");
         String openId = param.get("FromUserName");
@@ -111,16 +117,19 @@ public class EventMessageServiceImpl implements WeChatMessageService {
      * @return java.lang.String
      */
     private String scanEvent (Map<String,String> param) {
+        logger.info("************** SCAN Received weChat   ****************");
         String key = param.get("EventKey");
         String accountId = param.get("accountId");
         String openId = param.get("FromUserName");
         if (!StringUtils.isEmpty(key)) {
             logger.info("************** SCAN Received weChat  event key : {} ****************",key);
             QrCode qrCode = qrCodeService.getById(key);
-            qrCode.setFollowNum(qrCode.getFollowNum()+1);
-            qrCode.setTotalNum(qrCode.getTotalNum()+1);
-            qrCodeService.updateById(qrCode);
-            scanQrHandler.addElement(accountId,openId,key,qrCode.getContent());
+            if (Objects.nonNull(qrCode)) {
+                qrCode.setFollowNum(qrCode.getFollowNum()+1);
+                qrCode.setTotalNum(qrCode.getTotalNum()+1);
+                qrCodeService.updateById(qrCode);
+                scanQrHandler.addElement(accountId,openId,key,qrCode.getContent());
+            }
             return Constants.SUCCESS;
         }
         return Constants.SUCCESS;

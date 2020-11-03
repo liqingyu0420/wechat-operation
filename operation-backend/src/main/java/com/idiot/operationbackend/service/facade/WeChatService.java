@@ -463,7 +463,19 @@ public interface WeChatService {
    String getMaterialDetail(String accountId, String mediaId);
 
 
-  /**
+   /**
+    *  签名
+    * @author wangxiao
+    * @date 14:47 2020/11/3
+    * @param signature signature
+    * @param timestamp timestamp
+    * @param nonce nonce
+    * @return boolean
+    */
+    boolean checkSignature(String signature, String timestamp, String nonce);
+
+
+    /**
    * 不支持的消息
    * @author wangxiao
    * @date 15:27 2020/7/1
