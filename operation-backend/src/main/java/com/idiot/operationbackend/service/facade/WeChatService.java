@@ -411,7 +411,7 @@ public interface WeChatService {
     * @param contents 二维码内容
     * @throws Exception e
     */
-   void processScanQrCode (String accountId,String openId,String qrCodeId,String contents) throws Exception;
+   void processScanQrCode (String accountId,String openId,String qrCodeId,String contents);
 
 
 

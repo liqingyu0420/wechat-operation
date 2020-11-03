@@ -899,7 +899,6 @@ public class WeChatServiceImpl implements WeChatService, InitializingBean {
             fansService.saveOrUpdate(accountFans);
         }
         Account account = accountService.getById(accountId);
-        account.setFansNum(account.getFansNum()+1);
         accountService.updateById(account);
         FansActionStat var1 = new FansActionStat(accountId,openId,1);
         FansActionStat var2 = new FansActionStat(accountId,openId,4);
