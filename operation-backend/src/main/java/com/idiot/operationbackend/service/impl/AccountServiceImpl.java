@@ -45,6 +45,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account>
     public boolean updateUserIdByAccount(String accountId, String userId) {
         return update(Wrappers.<Account>lambdaUpdate()
                 .set(Account::getCreateUserId,userId)
+	.set(Account::getState,1)
                 .eq(Account::getId,accountId));
     }
 
