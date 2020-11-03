@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: operationBackendApplication
+  profiles:
+    active: test
+server:
+  port: 38090
+  servlet:
+    context-path: /wxoperate
+  compression:
+    enabled: true
+    mime-types: application/json
+    min-response-size: 2048

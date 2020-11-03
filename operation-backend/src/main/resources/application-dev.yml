@@ -1,0 +1,53 @@
+spring:
+  #  datasource
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://xxxxxxx:3306/xxxxxx?serverTimezone=UTC&characterEncoding=utf8
+    username: xxx
+    password: xxxxx
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      pool-name: mysqlDataSourcePool
+      maximum-pool-size: 20
+      minimum-idle: 10
+      connection-timeout: 120000
+      validation-timeout: 6000
+      idle-timeout: 30000
+      login-timeout: 5
+      max-lifetime: 60000
+#  mybatis-plus
+mybatis-plus:
+  global-config:
+    db-config:
+      id-type: id_worker_str
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+    default-enum-type-handler: org.apache.ibatis.type.EnumOrdinalTypeHandler
+  type-enums-package: com.idiot.operationbackend.support.enums
+# logging
+logging:
+  file:
+    name: ./log/wxoperate.log
+  level:
+    root: info
+    org.mybatis: debug
+wechat:
+  # 微信第三方平台 (独立部署需要自主申请)
+  platform:
+    # appid
+    appId: xxxx
+    # appsecret
+    appSecret: xxxx
+    # 授权事件接收URL
+    ticketUrl: https://xxxx/wxoperate/wechat/notice
+    # 加解密key
+    secret: xxx
+    # 开发平台配置token
+    token: xxxx
+    # authCallBackUrl 授权回调地址
+    authCallBack: https://xxxx/wxoperate/wechat/authCallback
+    # 消息接受地址
+    msgCallBack: https://xxxx/wxoperate/wechat/msgCallback
+# 授权确认界面地址 前端界面路由地址
+confirm-domain: https://xxxx/wx-hdb/#/confirm
