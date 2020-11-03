@@ -283,9 +283,9 @@ CREATE TABLE `t_qr_code`  (
   `account_id` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '公众号id',
   `label` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '公众号标题',
   `type` tinyint(1) NULL DEFAULT NULL COMMENT '类型 0 临时 1永久',
-  `total_num` int(0) NULL DEFAULT NULL COMMENT '总扫码次数',
-  `new_num` int(0) NULL DEFAULT NULL COMMENT '新扫码且关注',
-  `follow_num` int(0) NULL DEFAULT NULL COMMENT '已关注扫码',
+  `total_num` int(11) NULL DEFAULT 0 COMMENT '总扫码次数',
+  `new_num` int(11) NULL DEFAULT 0 COMMENT '新扫码且关注',
+  `follow_num` int(11) NULL DEFAULT 0 COMMENT '已关注扫码',
   `url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '二维码地址',
   `ticket` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT 'ticket',
   `push_type` tinyint(1) NULL DEFAULT NULL COMMENT '推送方式',
@@ -296,7 +296,6 @@ CREATE TABLE `t_qr_code`  (
   `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin COMMENT = '二维码' ROW_FORMAT = Dynamic;
-
 
 -- ----------------------------
 -- Table structure for t_account_menu 公众号菜单
