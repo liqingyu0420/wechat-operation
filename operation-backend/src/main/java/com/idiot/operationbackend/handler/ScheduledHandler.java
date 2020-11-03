@@ -39,7 +39,7 @@ public class ScheduledHandler {
      * @author wangxiao
      * @date 12:09 2020/9/17
      */
-    @Scheduled(cron = "0 0 1 * * ?")
+    @Scheduled(cron = "0 55 10 * * ?")
     public void  scheduledAccount () {
         logger.info("开始同步微信用户分析数据----->start,时间:{}", LocalDateTime.now().toString());
         List<Account> accounts = accountService.queryAccount();
@@ -49,7 +49,12 @@ public class ScheduledHandler {
         }
         for (Account account : accounts) {
             logger.info("同步微信公众号:{}用户分析数据----->,时间:{}", account.getId(),LocalDateTime.now().toString());
-            fansStatService.statAccountFansData(account.getId());
+            try {
+                fansStatService.statAccountFansData(account.getId());
+            }catch (Exception e){
+                logger.info("同步微信公众号:{}用户分析数据----->,时间:{} is error ", account.getId(),LocalDateTime.now().toString());
+            }
+
         }
         logger.info("开始同步微信用户分析数据----->end,时间:{}", LocalDateTime.now().toString());
     }
@@ -59,7 +64,7 @@ public class ScheduledHandler {
      * @author wangxiao
      * @date 12:09 2020/9/17
      */
-    @Scheduled(cron = "0 0 2 * * ?")
+    @Scheduled(cron = "0 0 11 * * ?")
     public void  scheduledArticle () {
         logger.info("开始同步微信图文分析数据----->start,时间:{}", LocalDateTime.now().toString());
         List<Account> accounts = accountService.queryAccount();
@@ -69,7 +74,12 @@ public class ScheduledHandler {
         }
         for (Account account : accounts) {
             logger.info("同步微信公众号:{}用户分析数据----->,时间:{}", account.getId(),LocalDateTime.now().toString());
-            articleStatService.syncArticleStatData(account.getId());
+            try {
+                articleStatService.syncArticleStatData(account.getId());
+            }catch (Exception e){
+                logger.info("同步微信公众号:{}用户分析数据----->,时间:{} is error", account.getId(),LocalDateTime.now().toString());
+            }
+
         }
         logger.info("开始同步微信用户分析数据----->end,时间:{}", LocalDateTime.now().toString());
     }
