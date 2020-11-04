@@ -62,6 +62,8 @@ public class GroupMsg {
 
     private String headImage;
 
+    private String msgId;
+
     public String getId() {
         return id;
     }
@@ -205,6 +207,14 @@ public class GroupMsg {
 
     public void setMsgType(Integer msgType) {
         this.msgType = msgType;
+    }
+
+    public String getMsgId() {
+        return msgId;
+    }
+
+    public void setMsgId(String msgId) {
+        this.msgId = msgId;
     }
 
     @Override

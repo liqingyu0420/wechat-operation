@@ -372,25 +372,26 @@ CREATE TABLE `t_customer_msg`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `t_group_msg`;
 CREATE TABLE `t_group_msg`  (
-  `id` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'id',
-  `account_id` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '公众号id',
-  `content` json NULL COMMENT '发送内容',
-  `send_time` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '发送时间',
-  `send_num` int(0) NULL DEFAULT 0 COMMENT '发送数量',
-  `msg_type` tinyint(1) NULL DEFAULT NULL COMMENT ' 0 图文 1 图片 2文字 3 音频 4 视频',
-  `type` tinyint(1) NULL DEFAULT NULL COMMENT ' 0 条件筛选 1 全部',
-  `repeat_send` tinyint(1) NULL DEFAULT NULL COMMENT '转发是否继续发送',
-  `select_sex` tinyint(1) NULL DEFAULT NULL COMMENT '选择性别',
-  `select_subscribe_time` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '订阅时间',
-  `select_province` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '省',
-  `select_city` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '城市',
-  `select_tag` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '标签',
-  `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '电话',
-  `status` tinyint(1) NULL DEFAULT NULL COMMENT '状态',
-  `create_time` datetime(0) NULL DEFAULT NULL,
-  `head_image` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL,
-  `nick_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL,
-  PRIMARY KEY (`id`) USING BTREE
+    `id` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'id',
+    `account_id` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '公众号id',
+    `content` json NULL COMMENT '发送内容',
+    `send_time` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '发送时间',
+    `send_num` int(11) NULL DEFAULT 0 COMMENT '发送数量',
+    `msg_type` tinyint(1) NULL DEFAULT NULL COMMENT ' 0 图文 1 图片 2文字 3 音频 4 视频',
+    `type` tinyint(1) NULL DEFAULT NULL COMMENT ' 0 条件筛选 1 全部',
+    `repeat_send` tinyint(1) NULL DEFAULT NULL COMMENT '转发是否继续发送',
+    `select_sex` tinyint(1) NULL DEFAULT NULL COMMENT '选择性别',
+    `select_subscribe_time` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '订阅时间',
+    `select_province` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '省',
+    `select_city` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '城市',
+    `select_tag` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '标签',
+    `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '电话',
+    `status` tinyint(1) NULL DEFAULT NULL COMMENT '状态',
+    `head_image` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL,
+    `nick_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL,
+    `msg_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL,
+    `create_time` datetime(0) NULL DEFAULT NULL,
+    PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin COMMENT = '群发消息' ROW_FORMAT = Dynamic;
 
 -- ----------------------------

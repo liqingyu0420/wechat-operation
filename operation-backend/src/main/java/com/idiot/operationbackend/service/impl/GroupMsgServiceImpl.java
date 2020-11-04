@@ -39,4 +39,10 @@ public class GroupMsgServiceImpl extends ServiceImpl<GroupMsgMapper, GroupMsg> i
         queryWrapper.orderByDesc(GroupMsg::getCreateTime);
         return page(queryPage,queryWrapper);
     }
+
+
+    @Override
+    public boolean upGroupMsg(String msgId, long sendNum) {
+        return update(Wrappers.<GroupMsg>lambdaUpdate().set(GroupMsg::getSendNum,sendNum).eq(GroupMsg::getMsgId,msgId));
+    }
 }

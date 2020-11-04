@@ -409,7 +409,6 @@ public interface WeChatService {
     * @param openId 用户
     * @param qrCodeId 二维码id
     * @param contents 二维码内容
-    * @throws Exception e
     */
    void processScanQrCode (String accountId,String openId,String qrCodeId,String contents);
 
@@ -426,6 +425,17 @@ public interface WeChatService {
     * @param pushType pushType
     */
    void sendMessage (String accountId,String openId,String nikeName,String content,int pushType);
+
+
+   /**
+    *  fansInfo
+    * @author wangxiao
+    * @date 13:32 2020/11/4
+    * @param accountId accountId
+    * @param openId openId
+    * @return AccountFans fans
+    */
+   AccountFans  fansInfo(String accountId,String openId);
 
 
 
@@ -474,6 +484,16 @@ public interface WeChatService {
     * @return boolean
     */
     boolean checkSignature(String signature, String timestamp, String nonce);
+
+    /**
+     *  群发推送
+     * @author wangxiao
+     * @date 13:23 2020/11/4
+     * @param msgId
+     * @param sendNum
+     * @return boolean
+     */
+    boolean upGroupMsg (String msgId,long sendNum);
 
 
     /**

@@ -32,7 +32,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 
@@ -328,27 +327,10 @@ public class WeChatServiceImpl implements WeChatService, InitializingBean {
         int size = openIds.size();
         logger.info("公众号：{}同步粉丝请求粉丝信息,openId 大小:{}---- start,时间:{}",accountId,size,LocalDateTime.now());
         List<AccountFans> accountFans =  new ArrayList<>(size);
-
         for (String openId : openIds) {
             AccountFans fans = fansService.queryByAccountIdAndOpenId(accountId,openId);
             if (fans == null) {
-                fans = new AccountFans();
-                JSONObject fansObject = JSON.parseObject(getFansInfo(accountId,openId));
-                fans.setAccountId(accountId);
-                fans.setOpenId(openId);
-                fans.setNickName(fansObject.getString("nickname"));
-                fans.setHeadImgUrl(fansObject.getString("headimgurl"));
-                fans.setSex(fansObject.getInteger("sex"));
-                fans.setSubscribe(fansObject.getInteger("subscribe"));
-                fans.setCity(fansObject.getString("city"));
-                fans.setProvince(fansObject.getString("province"));
-                fans.setSubscribeTime(fansObject.getLong("subscribe_time"));
-                fans.setSubscribeScene(fansObject.getString("subscribe_scene"));
-                fans.setUnionId(fansObject.getString("unionid"));
-                fans.setRemark(fansObject.getString("remark"));
-                fans.setGroupId(fansObject.getInteger("groupid"));
-                fans.setTagIdList(JSONObject.toJSONString(fansObject.getJSONArray("tagid_list")));
-                fans.setTags(fans.initTags());
+                fans = getAccountFans(accountId, openId);
                 fans.setState(true);
                 fans.setCreateTime(LocalDateTime.now().toEpochSecond(Constants.DEFAULT_ZONE));
                 accountFans.add(fans);
@@ -803,26 +785,21 @@ public class WeChatServiceImpl implements WeChatService, InitializingBean {
         logger.info("微信公众号群发消息任务，groupMsg:{}----start,时间:{}",groupMsg.toString(),LocalDateTime.now());
         List<String> openIds = null;
         String accountId = groupMsg.getAccountId();
-        Integer sex = null;
-        String province = null;
-        String city = null;
-        String tag = null;
-        String subscribeTime = null;
+        // fixme 订阅号和服务号都可以根据 tag id 群发 这里选择使用 openIds 群发
         if (!groupMsg.getType()) {
-            sex = groupMsg.getSelectSex();
-            province = groupMsg.getSelectProvince();
-            city = groupMsg.getSelectCity();
-            tag = groupMsg.getSelectTag();
-            subscribeTime = groupMsg.getSelectSubscribeTime();
+            int sex   = groupMsg.getSelectSex();
+            String province = groupMsg.getSelectProvince();
+            String city = groupMsg.getSelectCity();
+            String tag = groupMsg.getSelectTag();
+            String subscribeTime = groupMsg.getSelectSubscribeTime();
             List<AccountFans> fans = fansService.queryAccountFans(accountId,sex,province,city,tag,subscribeTime);
             openIds = fans.stream().map(AccountFans::getOpenId).collect(Collectors.toList());
         }
-        long count = sendGroupMessage(accountId,groupMsg.getContent(),groupMsg.getType(),
+        String msgId = sendGroupMessage(accountId,groupMsg.getContent(),groupMsg.getType(),
                 groupMsg.getRepeatSend(),openIds, groupMsg.getMsgType());
-        groupMsg.setStatus(count>0?Constants.SUCCESSED:Constants.FAILED);
-        groupMsg.setSendNum(count);
+        groupMsg.setStatus(StringUtils.isEmpty(msgId)?Constants.FAILED:Constants.SUCCESSED);
+        groupMsg.setMsgId(msgId);
         groupMsgService.updateById(groupMsg);
-
         logger.info("微信公众号群发消息任务，groupMsg:{}----end,时间:{}",groupMsg.toString(),LocalDateTime.now());
     }
 
@@ -876,34 +853,25 @@ public class WeChatServiceImpl implements WeChatService, InitializingBean {
         /**
          * 先保存新用户
          */
-        AccountFans accountFans = fansService.queryByAccountIdAndOpenId(accountId,openId);
-        if (Objects.isNull(accountFans)){
-            accountFans = new AccountFans();
-            JSONObject fansObject = JSON.parseObject(getFansInfo(accountId,openId));
-            accountFans.setAccountId(accountId);
-            accountFans.setOpenId(openId);
-            accountFans.setNickName(fansObject.getString("nickname"));
-            accountFans.setHeadImgUrl(fansObject.getString("headimgurl"));
-            accountFans.setSex(fansObject.getInteger("sex"));
-            accountFans.setSubscribe(fansObject.getInteger("subscribe"));
-            accountFans.setCity(fansObject.getString("city"));
-            accountFans.setProvince(fansObject.getString("province"));
-            accountFans.setSubscribeTime(fansObject.getLong("subscribe_time"));
-            accountFans.setSubscribeScene(fansObject.getString("subscribe_scene"));
-            accountFans.setUnionId(fansObject.getString("unionid"));
-            accountFans.setRemark(fansObject.getString("remark"));
-            accountFans.setGroupId(fansObject.getInteger("groupid"));
-            accountFans.setTagIdList(JSONObject.toJSONString(fansObject.getJSONArray("tagid_list")));
-            accountFans.setTags(accountFans.initTags());
-            accountFans.setState(true);
-            fansService.save(accountFans);
-        }
+        AccountFans fans = fansInfo(accountId,openId);
         FansActionStat var1 = new FansActionStat(accountId,openId,1);
         FansActionStat var2 = new FansActionStat(accountId,openId,4);
         fansActionStatService.saveBatchFansActionStat(var1,var2);
         String url = "https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=%s";
-        sendCustomerMessage(openId,contents,accountFans.getNickName(),accountId,url);
+        sendCustomerMessage(openId,contents,fans.getNickName(),accountId,url);
     }
+
+
+    @Override
+    public AccountFans fansInfo(String accountId, String openId) {
+        AccountFans accountFans = fansService.queryByAccountIdAndOpenId(accountId,openId);
+        if (Objects.isNull(accountFans)){
+            accountFans = getAccountFans(accountId, openId);
+            fansService.save(accountFans);
+        }
+        return  accountFans;
+    }
+
 
 
     @Override
@@ -926,19 +894,6 @@ public class WeChatServiceImpl implements WeChatService, InitializingBean {
             }
         }
 
-    }
-
-    private void sendCustomerMsg(String accountId,String openId,String nickName,JSONObject jsonObject) {
-        String url = "https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=%s";
-        String accessToken = getAuthorizerAccessToken(accountId);
-        url = String.format(url,accessToken);
-        String param = parseJson(openId,jsonObject).replace("<fans.nickname>",nickName);
-        logger.info("微信客服消息,全部发送,accountId:{},openId:{}----start,时间:{}",accountId,openId,LocalDateTime.now());
-        HttpHeaders  headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> request = new HttpEntity<>(param, headers);
-        String jsonStr = restTemplate.postForObject(url,request,String.class);
-        logger.info("微信客服消息,全部发送,accountId:{},openId:{}----end,时间:{},微信返回：{}",accountId,openId,LocalDateTime.now(),jsonStr);
     }
 
     @Override
@@ -965,12 +920,6 @@ public class WeChatServiceImpl implements WeChatService, InitializingBean {
         }
     }
 
-
-    public void  sendPushMessage(String accountId,String openId,String nickName,String content,String triggerVar,int pushType){
-        if (Constants.FIRST.equals(triggerVar)){
-            sendMessage(accountId, openId, nickName, content,pushType);
-        }
-    }
 
 
     @Override
@@ -1032,6 +981,11 @@ public class WeChatServiceImpl implements WeChatService, InitializingBean {
         return ciphertext != null && ciphertext.equals(signature.toUpperCase());
     }
 
+    @Override
+    public boolean upGroupMsg(String msgId, long sendNum) {
+        return groupMsgService.upGroupMsg(msgId, sendNum);
+    }
+
     /**
      *  群发消息
      * @author wangxiao
@@ -1043,20 +997,22 @@ public class WeChatServiceImpl implements WeChatService, InitializingBean {
      * @param openIds 发送用户群体
      * @return java.lang.Boolean
      */
-    private long  sendGroupMessage(String accountId, String contents, boolean toAll,
+    private String  sendGroupMessage(String accountId, String contents, boolean toAll,
                                    int repeatSend, List<String> openIds,int msgType) {
         logger.info("公众号:{}群发消息:{},toAll:{},repeatSend:{},openIds:{}",accountId,contents,toAll,repeatSend,openIds);
-        String requestUrl =  "https://api.weixin.qq.com/cgi-bin/message/mass/send?access_token=%s";
+        String requestUrl =  toAll?"https://api.weixin.qq.com/cgi-bin/message/mass/sendall?access_token=%s"
+                :"https://api.weixin.qq.com/cgi-bin/message/mass/send?access_token=%s";
         String accessToken = getAuthorizerAccessToken(accountId);
         requestUrl = String.format(requestUrl,accessToken);
         JSONArray jsonArray = JSONArray.parseArray(contents);
         int size = jsonArray.size();
         if (size == 0) {
-            return 0;
+            return null;
         }
-        int  groupCount =0;
+        String  msgId = null ;
         JSONObject temp = null;
         for (int i = 0; i < size; i++) {
+            // fixme 按照约定 这里只有一条数据
             temp = jsonArray.getJSONObject(i);
             logger.info("微信群发消息,accountId:{},openIds:{}----start,时间:{}",accountId,openIds,LocalDateTime.now());
             String param = parseToJson(temp,openIds,repeatSend,toAll,msgType);
@@ -1065,13 +1021,14 @@ public class WeChatServiceImpl implements WeChatService, InitializingBean {
             HttpEntity<String> request = new HttpEntity<>(param, headers);
             String jsonStr = restTemplate.postForObject(requestUrl,request,String.class);
             logger.info("微信群发消息,accountId:{},openIds:{}----end,时间:{},微信返回：{}",accountId,openIds,LocalDateTime.now(),jsonStr);
-            int errcode = JSONObject.parseObject(jsonStr).getIntValue(ERROR_CODE);
+            JSONObject respJsonObj = JSONObject.parseObject(jsonStr);
+            int errcode = respJsonObj.getIntValue(ERROR_CODE);
              if (0 == errcode) {
-                 groupCount+=1;
+                 msgId = respJsonObj.getString("msg_id");
              };
             logger.info("公众号:{}群发消息第{}条,发送结果:{}",accountId,i,0 == errcode);
         }
-        return groupCount;
+        return msgId;
     }
 
 
@@ -1120,7 +1077,7 @@ public class WeChatServiceImpl implements WeChatService, InitializingBean {
      * @param url url
      * @return long 发送人员数目
      */
-    public long sendCustomerMessage (String accountId,List<AccountFans> fansList,String contents,String url) {
+    private long sendCustomerMessage (String accountId,List<AccountFans> fansList,String contents,String url) {
         if (CollectionUtils.isEmpty(fansList)) {
             return 0;
         }
@@ -1168,6 +1125,74 @@ public class WeChatServiceImpl implements WeChatService, InitializingBean {
             String jsonStr = restTemplate.postForObject(url,request,String.class);
             logger.info("微信客服消息,单人第{}条发送,accountId:{},openId:{}----end,时间:{},微信返回：{}",i,accountId,openId,LocalDateTime.now(),jsonStr);
         }
+    }
+    /**
+     *  发送客服消息
+     * @author wangxiao
+     * @date 13:40 2020/11/4
+     * @param accountId accountId
+     * @param openId  openId
+     * @param nickName nickName
+     * @param jsonObject jsonObject
+     */
+    private void sendCustomerMsg(String accountId,String openId,String nickName,JSONObject jsonObject) {
+        String url = "https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=%s";
+        String accessToken = getAuthorizerAccessToken(accountId);
+        url = String.format(url,accessToken);
+        String param = parseJson(openId,jsonObject).replace("<fans.nickname>",nickName);
+        logger.info("微信客服消息,全部发送,accountId:{},openId:{}----start,时间:{}",accountId,openId,LocalDateTime.now());
+        HttpHeaders  headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> request = new HttpEntity<>(param, headers);
+        String jsonStr = restTemplate.postForObject(url,request,String.class);
+        logger.info("微信客服消息,全部发送,accountId:{},openId:{}----end,时间:{},微信返回：{}",accountId,openId,LocalDateTime.now(),jsonStr);
+    }
+
+    /**
+     *  客服消息（triggerVar == 1 发送 ）
+     * @author wangxiao
+     * @date 13:38 2020/11/4
+     * @param accountId accountId
+     * @param openId openId
+     * @param nickName nickName
+     * @param content content
+     * @param triggerVar triggerVar
+     * @param pushType pushType
+     */
+    private void  sendPushMessage(String accountId,String openId,String nickName,String content,String triggerVar,int pushType){
+        if (Constants.FIRST.equals(triggerVar)){
+            sendMessage(accountId, openId, nickName, content,pushType);
+        }
+    }
+
+    /**
+     *  wechat 请求 fansInfo
+     * @author wangxiao
+     * @date 13:37 2020/11/4
+     * @param accountId accountId
+     * @param openId openId
+     * @return com.idiot.operationbackend.entity.AccountFans
+     */
+    private AccountFans getAccountFans(String accountId, String openId) {
+        AccountFans accountFans =  new AccountFans();
+        JSONObject fansObject = JSON.parseObject(getFansInfo(accountId,openId));
+        accountFans.setAccountId(accountId);
+        accountFans.setOpenId(openId);
+        accountFans.setNickName(fansObject.getString("nickname"));
+        accountFans.setHeadImgUrl(fansObject.getString("headimgurl"));
+        accountFans.setSex(fansObject.getInteger("sex"));
+        accountFans.setSubscribe(fansObject.getInteger("subscribe"));
+        accountFans.setCity(fansObject.getString("city"));
+        accountFans.setProvince(fansObject.getString("province"));
+        accountFans.setSubscribeTime(fansObject.getLong("subscribe_time"));
+        accountFans.setSubscribeScene(fansObject.getString("subscribe_scene"));
+        accountFans.setUnionId(fansObject.getString("unionid"));
+        accountFans.setRemark(fansObject.getString("remark"));
+        accountFans.setGroupId(fansObject.getInteger("groupid"));
+        accountFans.setTagIdList(JSONObject.toJSONString(fansObject.getJSONArray("tagid_list")));
+        accountFans.setTags(accountFans.initTags());
+        accountFans.setState(true);
+        return accountFans;
     }
 
     /**
@@ -1223,10 +1248,11 @@ public class WeChatServiceImpl implements WeChatService, InitializingBean {
      */
     public String parseToJson(JSONObject jsonObject,List<String> openIds,int repeatSend,boolean toAll,int msgType ) {
         JSONObject parent = new JSONObject();
-        JSONObject filter = new JSONObject();
         JSONObject target = new JSONObject();
-        filter.put("is_to_all",toAll);
+
         if (toAll) {
+            JSONObject filter = new JSONObject();
+            filter.put("is_to_all",toAll);
             parent.put("filter",filter);
         }else {
             parent.put("touser",openIds);
@@ -1393,10 +1419,4 @@ public class WeChatServiceImpl implements WeChatService, InitializingBean {
         this.accountPushService = accountPushService;
     }
 
-
-    public static void main(String[] args) {
-        System.out.println(ThreadLocalRandom.current().nextInt(0,10));
-        System.out.println(ThreadLocalRandom.current().nextInt(0,10));
-        System.out.println();
-    }
 }

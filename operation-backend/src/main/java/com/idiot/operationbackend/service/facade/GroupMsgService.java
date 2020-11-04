@@ -24,4 +24,14 @@ public interface GroupMsgService extends IService<GroupMsg> {
      * @return com.baomidou.mybatisplus.extension.plugins.pagination.Page<com.idiot.operationbackend.entity.GroupMsg>
      */
     Page<GroupMsg> queryPageGroupMsg (int page, String startDate, String endDate,Integer status, List<String> ids);
+
+    /**
+     *  更新 群发状态
+     * @author wangxiao
+     * @date 13:24 2020/11/4
+     * @param msgId msgId
+     * @param sendNum sendNum
+     * @return boolean
+     */
+    boolean upGroupMsg(String msgId,long sendNum);
 }

@@ -94,6 +94,7 @@ public class EventMessageServiceImpl implements WeChatMessageService {
             }
             return Constants.SUCCESS;
         }
+        weChatService.fansInfo(accountId,openId);
         FansActionStat var2 = new FansActionStat(accountId,openId,2);
         fansActionStatService.saveBatchFansActionStat(var2);
         // 关注事件
@@ -103,10 +104,12 @@ public class EventMessageServiceImpl implements WeChatMessageService {
             logger.info("********************* 设置了关注回复 *****************");
             weChatService.sendMessage(accountId,openId,"",followReply.getContent(),followReply.getPushType());
             return Constants.SUCCESS;
+        }else {
+
+            // 是否有智能推送
+            weChatService.sendPushMessage(accountId,openId,0);
+            return Constants.SUCCESS;
         }
-        // 是否有智能推送
-        weChatService.sendPushMessage(accountId,openId,0);
-        return Constants.SUCCESS;
 
     }
 
@@ -208,6 +211,20 @@ public class EventMessageServiceImpl implements WeChatMessageService {
         return Constants.SUCCESS;
     }
 
+    /**
+     *  消息发送成功回调
+     * @author wangxiao
+     * @date 20:17 2020/9/24
+     * @param param param
+     * @return java.lang.String
+     */
+    private String massEndJobFinish(Map<String,String> param){
+        logger.info("************** MASSSENDJOBFINISH Received weChat   ****************");
+        String msgId = param.get("MsgID");
+        String sendCount = param.getOrDefault("SentCount","0");
+        weChatService.upGroupMsg(msgId,Long.parseLong(sendCount));
+        return Constants.SUCCESS;
+    }
 
     @Override
     public void afterPropertiesSet()  {
@@ -219,6 +236,7 @@ public class EventMessageServiceImpl implements WeChatMessageService {
             eventMap.put("CLICK",this::clickEvent);
             eventMap.put("VIEW",this::viewEvent);
             eventMap.put("unsubscribe",this::unsubscribeEvent);
+            eventMap.put("MASSSENDJOBFINISH",this::massEndJobFinish);
         }
         logger.info("微信消息,事件处理类--------------->初始化完成");
         WeChatMessageFactory.addService("event",this);
