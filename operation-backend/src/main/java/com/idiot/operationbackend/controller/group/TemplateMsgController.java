@@ -89,11 +89,11 @@ public class TemplateMsgController {
         templateMsg.setNickName(account.getNickName());
         templateMsg.setStatus(Constants.WAITING);
         templateMsg.setCreateTime(LocalDateTime.now().format(Constants.DATE_TIME_FORMATTER));
+        boolean addResult = templateMsgService.save(templateMsg);
         JobTask job = new JobTask("模板消息定时推送任务",sendTime,templateMsg.getId(),Constants.TEMPLATE);
         job.setAccountId(accountId);
         job.setNikeName(account.getNickName());
         job.setHeadImage(account.getHeadImage());
-        boolean addResult = templateMsgService.save(templateMsg);
         if (addResult){
             jobScheduleHandler.saveToDB(job);
             jobScheduleHandler.addAndRegisterJob(job);
