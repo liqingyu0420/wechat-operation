@@ -31,6 +31,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -906,27 +907,38 @@ public class WeChatServiceImpl implements WeChatService, InitializingBean {
 
 
     @Override
-    public void sendMessage(String accountId, String openId, String nikeName, String content) {
+    public void sendMessage(String accountId, String openId, String nikeName, String content,int pushType) {
         content = content.replace("<fans.nickname>",nikeName);
         JSONArray jsonArray = JSONArray.parseArray(content);
         int size = jsonArray.size();
         if (size == 0) {
             return;
         }
+        JSONObject temp  = null;
+        if (2==pushType){
+            int target = ThreadLocalRandom.current().nextInt(0,size-1);
+            temp = jsonArray.getJSONObject(target);
+            sendCustomerMsg(accountId,openId,nikeName,temp);
+        }else {
+            for (int i = 0; i < size; i++) {
+                temp = jsonArray.getJSONObject(i);
+                sendCustomerMsg(accountId,openId,nikeName,temp);
+            }
+        }
+
+    }
+
+    private void sendCustomerMsg(String accountId,String openId,String nickName,JSONObject jsonObject) {
         String url = "https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=%s";
         String accessToken = getAuthorizerAccessToken(accountId);
         url = String.format(url,accessToken);
-        JSONObject temp  = null;
-        for (int i = 0; i < size; i++) {
-            temp = jsonArray.getJSONObject(i);
-            String param = parseJson(openId,temp);
-            logger.info("微信客服消息,单人第{}条发送,accountId:{},openId:{}----start,时间:{}",i,accountId,openId,LocalDateTime.now());
-            HttpHeaders  headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<String> request = new HttpEntity<>(param, headers);
-            String jsonStr = restTemplate.postForObject(url,request,String.class);
-            logger.info("微信客服消息,单人第{}条发送,accountId:{},openId:{}----end,时间:{},微信返回：{}",i,accountId,openId,LocalDateTime.now(),jsonStr);
-        }
+        String param = parseJson(openId,jsonObject).replace("<fans.nickname>",nickName);
+        logger.info("微信客服消息,全部发送,accountId:{},openId:{}----start,时间:{}",accountId,openId,LocalDateTime.now());
+        HttpHeaders  headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> request = new HttpEntity<>(param, headers);
+        String jsonStr = restTemplate.postForObject(url,request,String.class);
+        logger.info("微信客服消息,全部发送,accountId:{},openId:{}----end,时间:{},微信返回：{}",accountId,openId,LocalDateTime.now(),jsonStr);
     }
 
     @Override
@@ -945,18 +957,18 @@ public class WeChatServiceImpl implements WeChatService, InitializingBean {
                 if (localTime.isAfter(start) && localTime.isBefore(end)) {
                     logger.info("********************* 设置了智能回复且第{}位时 1 在安静时间内 *****************", index);
                 } else  {
-                    sendPushMessage(accountId,openId,fans.getNickName(),accountPush.getContent(),triggerVar);
+                    sendPushMessage(accountId,openId,fans.getNickName(),accountPush.getContent(),triggerVar,accountPush.getPushType());
                 }
             }else {
-                sendPushMessage(accountId,openId,fans.getNickName(),accountPush.getContent(),triggerVar);
+                sendPushMessage(accountId,openId,fans.getNickName(),accountPush.getContent(),triggerVar,accountPush.getPushType());
             }
         }
     }
 
 
-    public void  sendPushMessage(String accountId,String openId,String nickName,String content,String triggerVar){
+    public void  sendPushMessage(String accountId,String openId,String nickName,String content,String triggerVar,int pushType){
         if (Constants.FIRST.equals(triggerVar)){
-            sendMessage(accountId, openId, nickName, content);
+            sendMessage(accountId, openId, nickName, content,pushType);
         }
     }
 
@@ -1379,5 +1391,12 @@ public class WeChatServiceImpl implements WeChatService, InitializingBean {
     @Autowired
     public void setAccountPushService(AccountPushService accountPushService) {
         this.accountPushService = accountPushService;
+    }
+
+
+    public static void main(String[] args) {
+        System.out.println(ThreadLocalRandom.current().nextInt(0,10));
+        System.out.println(ThreadLocalRandom.current().nextInt(0,10));
+        System.out.println();
     }
 }

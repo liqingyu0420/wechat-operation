@@ -101,7 +101,7 @@ public class EventMessageServiceImpl implements WeChatMessageService {
         if (Objects.nonNull(followReply)) {
            // 设置了关注回复
             logger.info("********************* 设置了关注回复 *****************");
-            weChatService.sendMessage(accountId,openId,"",followReply.getContent());
+            weChatService.sendMessage(accountId,openId,"",followReply.getContent(),followReply.getPushType());
             return Constants.SUCCESS;
         }
         // 是否有智能推送

@@ -423,9 +423,9 @@ public interface WeChatService {
     * @param openId openId
     * @param nikeName  nikeName
     * @param content content
-    * @return void
+    * @param pushType pushType
     */
-   void sendMessage (String accountId,String openId,String nikeName,String content);
+   void sendMessage (String accountId,String openId,String nikeName,String content,int pushType);
 
 
 
