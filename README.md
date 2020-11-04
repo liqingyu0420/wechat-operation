@@ -1,14 +1,13 @@
 # [wechat-operation](#wechat-operation)
 ![运营星](https://img-blog.csdnimg.cn/20201102164123661.jpg#pic_center)
+微信公众号深度运营平台————运营星,使公众号运营更加灵活,快速提升用户体验感!
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![GitHub Stars](https://img.shields.io/github/stars/7-idiot/wechat-operation)](https://github.com/7-idiot/wechat-operation/stargazers)
 [![GitHub Forks](https://img.shields.io/github/forks/7-idiot/wechat-operation)](https://github.com/7-idiot/wechat-operatione/fork)
 [![GitHub issues](https://img.shields.io/github/issues/7-idiot/wechat-operation.svg)](https://github.com/7-idiot/wechat-operation/issues)
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/7-idiot/wechat-operation.svg)](https://github.com/7-idiot/wechat-operation/issues "Percentage of issues still open")
-
-微信公众号深度运营平台——运营星,使公众号运营更加灵活,快速提升用户体验感!
-
 ## [Features](#features)
+* 微信第三方平台
 * 一键授权公众号,帮助管理微信公众号.
 * 实时同步粉丝信息,及时统计分析用户数据。
 * 标签、备注同步功能使用户管理更加便捷
