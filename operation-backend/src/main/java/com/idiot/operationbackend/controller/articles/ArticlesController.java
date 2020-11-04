@@ -54,6 +54,7 @@ public class ArticlesController {
                                                                              @RequestParam String accountId,
                                                                              @RequestParam int page){
         String userId = JwtTokenUtil.getUserId(token);
+        page= page>0?page-1:0;
         logger.info("用户：{}查询微信服务器上公众号{}图文-------------start",userId,accountId);
         JSONObject wxJson = weChatService.queryAccountMaterial(accountId,"news",page,8);
         logger.info("用户：{}查询微信服务器上公众号{}图文-------------end",userId,accountId);
