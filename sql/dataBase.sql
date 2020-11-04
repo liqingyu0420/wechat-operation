@@ -376,7 +376,7 @@ CREATE TABLE `t_group_msg`  (
   `account_id` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '公众号id',
   `content` json NULL COMMENT '发送内容',
   `send_time` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '发送时间',
-  `send_num` int(0) NULL DEFAULT NULL COMMENT '发送数量',
+  `send_num` int(0) NULL DEFAULT 0 COMMENT '发送数量',
   `msg_type` tinyint(1) NULL DEFAULT NULL COMMENT ' 0 图文 1 图片 2文字 3 音频 4 视频',
   `type` tinyint(1) NULL DEFAULT NULL COMMENT ' 0 条件筛选 1 全部',
   `repeat_send` tinyint(1) NULL DEFAULT NULL COMMENT '转发是否继续发送',
