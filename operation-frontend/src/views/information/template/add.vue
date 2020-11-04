@@ -96,6 +96,7 @@
               <div class="condition-filter" style="marginLeft: -0px">
                 <a-input
                   v-if="templateData.linkType === 0"
+                  v-model="templateData.linkUrl"
                   placeholder="非必填,输入跳转链接，且必须以http://或http://开头"
                   v-decorator="['linkUrl', { rules: [{ required: true, message: '请填写跳转地址' }] }]"
                 />
@@ -338,7 +339,7 @@ export default {
       const { data, code } = await postTemplate($par)
       if (code === 200) {
           console.log(data)
-          this.$route.replace('/information/template')
+          this.$router.replace('/information/template')
       }
     },
     // 查询模板消息详情

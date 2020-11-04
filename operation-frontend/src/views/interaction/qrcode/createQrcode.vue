@@ -137,6 +137,7 @@ export default {
       if (code === 200) {
         console.log(data)
         this.$message.success(`${this.id ? '修改' : '新增'} 成功`)
+         this.$router.replace('/information/qrcode')
       }
     },
     changeContent (item) {

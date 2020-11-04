@@ -236,18 +236,18 @@ export default {
         return item
       })
       this.content = [{ imagetextlist, type: this.massData.msgType }]
-      this.massData.media_id = item.media_id
+      this.massData.media_id = item.mediaId
     },
     // 选择视频
     changeVideo (item) {
       this.content = [{ ...item, type: this.massData.msgType }]
-      this.massData.media_id = item.media_id
+      this.massData.media_id = item.mediaId
     },
     // 选择音频
     changeAudit (item) {
       console.log(item, 'item')
       this.content = [{ ...item, type: this.massData.msgType }]
-      this.massData.media_id = item.media_id
+      this.massData.media_id = item.mediaId
     },
     // 确定文字
     changeText (item) {
