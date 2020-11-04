@@ -149,13 +149,15 @@ public class Constants {
      * @param before before
      * @return java.math.BigDecimal
      */
-    public static BigDecimal calcRate(long now, long before) {
-        if (0 == before) {
+    public static BigDecimal calcRate(Long now, Long before) {
+        long nowNum  =  null != now? now :0;
+        long beforeNum  =  null != before? before :0;
+        if (0 == beforeNum) {
             return BigDecimal.valueOf(100);
-        } else if (0 == now) {
+        } else if (0 == nowNum) {
             return Constants.ZERO_RATE;
         }else {
-            return BigDecimal.valueOf(((now - before) * 100) / before).setScale(2);
+            return BigDecimal.valueOf(((nowNum - beforeNum) * 100) / beforeNum).setScale(2);
         }
     }
 

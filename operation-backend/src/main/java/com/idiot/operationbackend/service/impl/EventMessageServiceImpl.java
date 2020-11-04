@@ -187,6 +187,7 @@ public class EventMessageServiceImpl implements WeChatMessageService {
         String openId = param.get("FromUserName");
         FansActionStat var2 = new FansActionStat(accountId,openId,5);
         fansActionStatService.saveBatchFansActionStat(var2);
+        weChatService.sendPushMessage(accountId,openId,2);
         return Constants.SUCCESS;
     }
 

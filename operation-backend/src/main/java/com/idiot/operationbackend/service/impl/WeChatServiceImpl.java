@@ -310,7 +310,7 @@ public class WeChatServiceImpl implements WeChatService, InitializingBean {
             JSONArray openIdArray = respJsonBody.getJSONObject("data").getJSONArray("openid");
             List<String> openIds = JSONArray.parseArray(openIdArray.toJSONString(),String.class);
             fansInfoHandler.doSyncUserTask(accountId,openIds);
-        }while (count < total);
+        }while (count <= total);
         Constants.LOCK_CACHE.invalidate(lockKey);
         logger.info("公众号：{}同步粉丝数据----end,时间:{}",accountId, LocalDateTime.now());
         return count;
@@ -876,7 +876,6 @@ public class WeChatServiceImpl implements WeChatService, InitializingBean {
          * 先保存新用户
          */
         AccountFans accountFans = fansService.queryByAccountIdAndOpenId(accountId,openId);
-
         if (Objects.isNull(accountFans)){
             accountFans = new AccountFans();
             JSONObject fansObject = JSON.parseObject(getFansInfo(accountId,openId));
@@ -896,10 +895,8 @@ public class WeChatServiceImpl implements WeChatService, InitializingBean {
             accountFans.setTagIdList(JSONObject.toJSONString(fansObject.getJSONArray("tagid_list")));
             accountFans.setTags(accountFans.initTags());
             accountFans.setState(true);
-            fansService.saveOrUpdate(accountFans);
+            fansService.save(accountFans);
         }
-        Account account = accountService.getById(accountId);
-        accountService.updateById(account);
         FansActionStat var1 = new FansActionStat(accountId,openId,1);
         FansActionStat var2 = new FansActionStat(accountId,openId,4);
         fansActionStatService.saveBatchFansActionStat(var1,var2);
@@ -934,21 +931,32 @@ public class WeChatServiceImpl implements WeChatService, InitializingBean {
 
     @Override
     public void sendPushMessage(String accountId, String openId, int index) {
+
         AccountPush accountPush = accountPushService.queryAccountPush(accountId);
         AccountFans fans = fansService.queryByAccountIdAndOpenId(accountId, openId);
         if (Objects.nonNull(accountPush)) {
-            int trigger = accountPush.getPushTrigger();
-            LocalTime localTime = LocalTime.now();
+            logger.info("微信公众号:{}设置了智能回复 ",accountId);
+            String trigger = accountPush.getPushTrigger();
+            String triggerVar = String.valueOf(trigger.charAt(index));
             if (!StringUtils.isEmpty(accountPush.getQuiet())) {
-                String first = String.valueOf(String.valueOf(trigger).charAt(index));
+                LocalTime localTime = LocalTime.now();
                 LocalTime start = LocalTime.parse(accountPush.getQuiet().split("-")[0]);
                 LocalTime end = LocalTime.parse(accountPush.getQuiet().split("-")[1]);
-                if (localTime.isAfter(start) && localTime.isBefore(end) && Constants.FIRST.equals(first)) {
+                if (localTime.isAfter(start) && localTime.isBefore(end)) {
                     logger.info("********************* 设置了智能回复且第{}位时 1 在安静时间内 *****************", index);
-                } else if (Constants.FIRST.equals(first)) {
-                    sendMessage(accountId, openId, fans.getNickName(), accountPush.getContent());
+                } else  {
+                    sendPushMessage(accountId,openId,fans.getNickName(),accountPush.getContent(),triggerVar);
                 }
+            }else {
+                sendPushMessage(accountId,openId,fans.getNickName(),accountPush.getContent(),triggerVar);
             }
+        }
+    }
+
+
+    public void  sendPushMessage(String accountId,String openId,String nickName,String content,String triggerVar){
+        if (Constants.FIRST.equals(triggerVar)){
+            sendMessage(accountId, openId, nickName, content);
         }
     }
 
@@ -1300,8 +1308,8 @@ public class WeChatServiceImpl implements WeChatService, InitializingBean {
             parent.put("text",target);
             parent.put("msgtype","text");
         }else if (Constants.IMG == type) {
-            target.put("media_ids",jsonObject.getString("media_id"));
-            parent.put("images",target);
+            target.put("media_id",jsonObject.getString("mediaId"));
+            parent.put("image",target);
             parent.put("msgtype","image");
         }else if (Constants.NEWS == type) {
             target.put("articles",jsonObject.getJSONArray("imagetextlist"));

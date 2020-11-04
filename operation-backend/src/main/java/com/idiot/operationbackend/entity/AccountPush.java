@@ -29,7 +29,7 @@ public class AccountPush {
 
     private String quiet;
 
-    private Integer pushTrigger;
+    private String pushTrigger;
 
     private Integer pushLimit;
 
@@ -98,11 +98,11 @@ public class AccountPush {
         this.quiet = quiet;
     }
 
-    public Integer getPushTrigger() {
+    public String getPushTrigger() {
         return pushTrigger;
     }
 
-    public void setPushTrigger(Integer pushTrigger) {
+    public void setPushTrigger(String pushTrigger) {
         this.pushTrigger = pushTrigger;
     }
 

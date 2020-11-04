@@ -83,7 +83,8 @@ public class ScanQrHandler implements InitializingBean {
                 try {
                     weChatService.processScanQrCode(accountId,openId,qrCodeId,contents);
                 }catch (Exception e){
-                    logger.error("扫描二维码推送信息,qrCodeId:{},openId:{},accountId:{}------>is error ",qrCodeId,openId,accountId);
+                    String errorStr = Arrays.stream(e.getStackTrace()).map(StackTraceElement::toString).collect(Collectors.joining("\n"));
+                    logger.error("扫描二维码推送信息,------>is error {}",errorStr);
                 }
             }
         }
