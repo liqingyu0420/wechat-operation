@@ -1,5 +1,5 @@
 # [wechat-operation](#wechat-operation)
-![运营星](https://img-blog.csdnimg.cn/20201102164123661.jpg#pic_center)
+![运营星](https://img-blog.csdnimg.cn/20201102164123661.jpg#pic_center) <br/>
 微信公众号深度运营平台————运营星,使公众号运营更加灵活,快速提升用户体验感! <br/>
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![GitHub Stars](https://img.shields.io/github/stars/7-idiot/wechat-operation)](https://github.com/7-idiot/wechat-operation/stargazers)
