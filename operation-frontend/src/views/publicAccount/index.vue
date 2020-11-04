@@ -14,7 +14,7 @@
           {{ record.nickName }}
         </span >
         <span slot="accType" slot-scope="text, record">
-          {{ record.serviceTypeInfo === 2? '服务号' : '订阅号' }}
+          {{ record.serviceTypeInfo.id === 2? '服务号' : '订阅号' }}
         </span >
         <span slot="verifyType" slot-scope="text, record">
           {{ record.verifyTypeInfo }}
@@ -110,7 +110,7 @@ export default {
         console.log(data)
         this.publicAccountData = data.map(item => {
           item.serviceTypeInfo = JSON.parse(item.serviceTypeInfo)
-          item.verifyTypeInfo = this.verifyTypeInfo[JSON.parse(item.verifyTypeInfo).id]
+          item.verifyTypeInfo = this.verifyTypeInfo[JSON.parse(item.verifyTypeInfo).id -1 ]
           return item
         })
       }
