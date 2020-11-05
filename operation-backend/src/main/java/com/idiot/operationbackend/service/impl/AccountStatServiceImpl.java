@@ -177,21 +177,4 @@ public class AccountStatServiceImpl extends ServiceImpl<AccountStatMapper, Accou
                 .le(AccountStat::getStatDate,endStr)
                 .orderByAsc(AccountStat::getStatDate));
     }
-
-    public static void main(String[] args) {
-
-        long totalNum = 0;
-        String json = "{\"list\":[{\"ref_date\":\"2020-11-02\",\"user_source\":0,\"cumulate_user\":2329}]}";
-        JSONObject jsonObjectTotal = JSONObject.parseObject(json);
-        JSONArray jsonArrayTotal = new JSONArray(0);
-        if (Objects.nonNull(jsonObjectTotal)) {
-            jsonArrayTotal = jsonObjectTotal.getJSONArray("list");
-        }
-        int totalSize = jsonArrayTotal.size();
-        if (totalSize > 0) {
-            totalNum = jsonArrayTotal.getJSONObject(0).getLongValue("cumulate_user");
-            System.out.println(totalNum);
-        }
-
-    }
 }
