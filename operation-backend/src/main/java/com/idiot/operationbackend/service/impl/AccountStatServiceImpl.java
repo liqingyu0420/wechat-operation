@@ -114,7 +114,7 @@ public class AccountStatServiceImpl extends ServiceImpl<AccountStatMapper, Accou
         ydData.setSevenNum(sevenInactiveNum);
         ydData.setFifteenNum(fifteenInactiveNum);
         ydData.setPageReadNum(0L);
-        long finalTotalNum = totalNum;
+ 
         statData.stream().filter(e->beforeDay.equals(e.getStatDate()))
                 .findFirst()
                 .map(e->{
@@ -124,7 +124,7 @@ public class AccountStatServiceImpl extends ServiceImpl<AccountStatMapper, Accou
                     ydData.setInactiveRate(Constants.calcRate(ydData.getInactiveNum(), e.getInactiveNum()));
                     ydData.setPageReadRate(Constants.calcRate(ydData.getPageReadNum(),e.getPageReadNum()));
                     ydData.setInactiveRate(Constants.calcRate(ydData.getInactiveNum(),e.getInactiveNum()));
-                    if (0 == finalTotalNum){
+                    if (0 == ydData.getTotalFansNum()){
                         // 微信返回总日汇总是 [] 需要把前天copy 进来
                         ydData.setTotalFansNum(e.getTotalFansNum());
                     }
