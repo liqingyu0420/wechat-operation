@@ -95,25 +95,25 @@ CREATE TABLE `t_account_tag`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `t_account_stat`;
 CREATE TABLE `t_account_stat`  (
-   `id` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'id',
-   `account_id` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '公众号id',
-   `new_num` int(11) NULL DEFAULT 0 COMMENT '新增数量',
-   `cancel_num` int(11) NULL DEFAULT 0 COMMENT '取关数量',
-   `inactive_num` int(11) NULL DEFAULT 0 COMMENT '活跃数量',
-   `total_fans_num` int(11) NULL DEFAULT 0 COMMENT '总粉丝数',
-   `add_num` int(11) NULL DEFAULT 0 COMMENT '净增数量',
-   `page_read_num` int(11) NULL DEFAULT 0 COMMENT '阅读数量',
-   `new_rate` decimal(5, 2) NULL DEFAULT NULL COMMENT '新增比例',
-   `cancel_rate` decimal(5, 2) NULL DEFAULT NULL COMMENT '取关比例',
-   `inactive_rate` decimal(5, 2) NULL DEFAULT NULL COMMENT '活跃数量',
-   `total_fans_rate` decimal(5, 2) NULL DEFAULT NULL COMMENT '总粉丝比例',
-   `add_rate` decimal(5, 2) NULL DEFAULT NULL COMMENT '净增比例',
-   `page_read_rate` decimal(5, 2) NULL DEFAULT NULL COMMENT '阅读比例',
-   `seven_num` int(11) NULL DEFAULT 0 COMMENT '七天',
-   `fifteen_num` int(11) NULL DEFAULT 0 COMMENT '15天',
-   `stat_date` date NULL DEFAULT NULL COMMENT '统计日期',
-   `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建日期',
-   PRIMARY KEY (`id`) USING BTREE
+  `id` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'id',
+  `account_id` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '公众号id',
+  `new_num` int(11) NULL DEFAULT 0 COMMENT '新增数量',
+  `cancel_num` int(11) NULL DEFAULT 0 COMMENT '取关数量',
+  `inactive_num` int(11) NULL DEFAULT 0 COMMENT '活跃数量',
+  `total_fans_num` int(11) NULL DEFAULT 0 COMMENT '总粉丝数',
+  `add_num` int(11) NULL DEFAULT 0 COMMENT '净增数量',
+  `page_read_num` int(11) NULL DEFAULT 0 COMMENT '阅读数量',
+  `new_rate` decimal(5, 2) NULL DEFAULT 0.00 COMMENT '新增比例',
+  `cancel_rate` decimal(5, 2) NULL DEFAULT 0.00 COMMENT '取关比例',
+  `inactive_rate` decimal(5, 2) NULL DEFAULT 0.00 COMMENT '活跃数量',
+  `total_fans_rate` decimal(5, 2) NULL DEFAULT 0.00 COMMENT '总粉丝比例',
+  `add_rate` decimal(5, 2) NULL DEFAULT 0.00 COMMENT '净增比例',
+  `page_read_rate` decimal(5, 2) NULL DEFAULT 0.00 COMMENT '阅读比例',
+  `seven_num` int(11) NULL DEFAULT 0 COMMENT '七天',
+  `fifteen_num` int(11) NULL DEFAULT 0 COMMENT '15天',
+  `stat_date` date NULL DEFAULT NULL COMMENT '统计日期',
+  `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建日期',
+  PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin COMMENT = '公众号粉丝统计' ROW_FORMAT = Dynamic;
 -- ----------------------------
 -- Table structure for 粉丝动作统计
