@@ -116,7 +116,7 @@ public class AccountStatServiceImpl extends ServiceImpl<AccountStatMapper, Accou
         ydData.setPageReadNum(0L);
         statData.stream().filter(e->beforeDay.equals(e.getStatDate()))
                 .findFirst()
-                .map(e->{
+                .ifPresent(e->{
                     if (0 == ydData.getTotalFansNum()){
                         // 微信返回总日汇总是 [] 需要把前天copy 进来
                         ydData.setTotalFansNum(e.getTotalFansNum());
@@ -127,7 +127,6 @@ public class AccountStatServiceImpl extends ServiceImpl<AccountStatMapper, Accou
                     ydData.setTotalFansRate(Constants.calcRate(ydData.getTotalFansNum(),e.getTotalFansNum()));
                     ydData.setAddRate(Constants.calcRate(ydData.getAddNum(), e.getAddNum()));
                     ydData.setPageReadRate(Constants.calcRate(ydData.getPageReadNum(),e.getPageReadNum()));
-                    return ydData;
         });
         ydData.setCreateTime(LocalDateTime.now().format(Constants.DATE_TIME_FORMATTER));
         saveOrUpdate(ydData);
