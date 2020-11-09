@@ -114,20 +114,19 @@ public class AccountStatServiceImpl extends ServiceImpl<AccountStatMapper, Accou
         ydData.setSevenNum(sevenInactiveNum);
         ydData.setFifteenNum(fifteenInactiveNum);
         ydData.setPageReadNum(0L);
- 
         statData.stream().filter(e->beforeDay.equals(e.getStatDate()))
                 .findFirst()
                 .map(e->{
-                    ydData.setAddRate(Constants.calcRate(ydData.getAddNum(), e.getAddNum()));
-                    ydData.setNewRate(Constants.calcRate(ydData.getNewNum(), e.getNewNum()));
-                    ydData.setCancelRate(Constants.calcRate(ydData.getCancelNum(), e.getCancelNum()));
-                    ydData.setInactiveRate(Constants.calcRate(ydData.getInactiveNum(), e.getInactiveNum()));
-                    ydData.setPageReadRate(Constants.calcRate(ydData.getPageReadNum(),e.getPageReadNum()));
-                    ydData.setInactiveRate(Constants.calcRate(ydData.getInactiveNum(),e.getInactiveNum()));
                     if (0 == ydData.getTotalFansNum()){
                         // 微信返回总日汇总是 [] 需要把前天copy 进来
                         ydData.setTotalFansNum(e.getTotalFansNum());
                     }
+                    ydData.setNewRate(Constants.calcRate(ydData.getNewNum(), e.getNewNum()));
+                    ydData.setCancelRate(Constants.calcRate(ydData.getCancelNum(), e.getCancelNum()));
+                    ydData.setInactiveRate(Constants.calcRate(ydData.getInactiveNum(), e.getInactiveNum()));
+                    ydData.setTotalFansRate(Constants.calcRate(ydData.getTotalFansNum(),e.getTotalFansNum()));
+                    ydData.setAddRate(Constants.calcRate(ydData.getAddNum(), e.getAddNum()));
+                    ydData.setPageReadRate(Constants.calcRate(ydData.getPageReadNum(),e.getPageReadNum()));
                     return ydData;
         });
         ydData.setCreateTime(LocalDateTime.now().format(Constants.DATE_TIME_FORMATTER));
